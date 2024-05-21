@@ -1,3 +1,5 @@
+Hamhanded clone of https://github.com/AlexCodeGlider/gliderFlightPlanner. 
+
 # Glider Flight Planner
 
 Glider Flight Planner is a web application designed to assist glider pilots in planning their flights. The app provides minimum altitude polygons on various map backgrounds based on user-defined flight and wind parameters.
