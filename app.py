@@ -19,6 +19,27 @@ app.config['SESSION_TYPE'] = 'filesystem'
 
 Session(app)
 
+type_mapping = {
+    '0': 'Unknown',
+    '1': 'Waypoint',
+    '2': 'Airfield - grass runway',
+    '3': 'Outlanding',
+    '4': 'Gliding Airfield',
+    '5': 'Airfield - solid surface runway',
+    '6': 'Mountain Pass',
+    '7': 'Mountain Top',
+    '8': 'Transmitter Mast',
+    '9': 'VOR',
+    '10': 'NDB',
+    '11': 'Cooling Tower',
+    '12': 'Dam',
+    '13': 'Tunnel',
+    '14': 'Bridge',
+    '15': 'PowerPlant',
+    '16': 'Castle',
+    '17': 'Intersection'
+}
+
 @app.route('/')
 def home():
     if 'agreed_to_terms' in session:
@@ -42,24 +63,33 @@ def index():
     
     data = []
 
-    # Define the mapping for the Type column
-    type_mapping = {
-        'A': 'Airfield',
-        'T': 'Turnpoint',
-        'TA': 'Airfield/Turnpoint',
-        'TL': 'Landable/Turnpoint',
-        'AT': 'Airfield/Turnpoint',
-        'L': 'Landable',
-        'AL': 'Airport/Landable'
-    }
+    # Eric - Switched to cup style coding
 
     # Load data from CSV
-    with open('data/enriched_locations.csv', 'r') as file:
+    #with open('data/enriched_locations.csv', 'r') as file:
+    with open('data/Sterling_MA_2024_04.csv', 'r') as file:
+        done = ''
         reader = csv.DictReader(file)
         for row in reader:
+
             # Replace the value in the Type column using the mapping
-            row['Type'] = type_mapping.get(row['Type'], row['Type'])
-            data.append(row)
+            # row['Type'] = type_mapping.get(row['Type'], row['Type'])
+            if  'Related Tasks'  in row['name'] or row['name'] == '':
+                done = 'done'
+
+            if (done == '') :
+                row['style'] = type_mapping.get(row['style'], row['style'])
+
+                row['lat'] = ((float(row['lat'][0:2])
+                                + float(row['lat'][2:4])/60
+                                + float(row['lat'][4:8])/60) * ((-1, 1)[row['lat'][-1] =='N'] ))
+
+                row['lon'] = ((float(row['lon'][0:3])
+                      + float(row['lon'][3:5])/60
+                      + float(row['lon'][5:9])/60) * ((-1, 1)[row['lon'][-1] == 'E'] ))
+                data.append(row)
+                print(row)
+    data.sort(key=lambda turnpoint: turnpoint['name'])
 
     # Load gliders data from the JSON file
     with open('data/gliders.json', 'r') as file:
@@ -141,14 +171,36 @@ def map_page():
     longitudes = request.args.getlist('longitudes')
 
     # Load data from CSV
-    with open('data/Crystal23.csv', 'r') as file:
+    with open('data/Sterling_MA_2024_04.csv', 'r') as file:
+        done = ''
         reader = csv.DictReader(file)
         for row in reader:
-            data.append(row)
+
+            # Replace the value in the Type column using the mapping
+            # row['Type'] = type_mapping.get(row['Type'], row['Type'])
+            if  'Related Tasks'  in row['name'] or row['name'] == '':
+                done = 'done'
+
+            if (done == '') :
+                row['style'] = type_mapping.get(row['style'], row['style'])
+                if (row['elev'].endswith('ft')) :
+                    row['elev'] = row['elev'][:-2]
+                elif (row['elev'].endswith('m')):
+                    row['elev'] = float(row['elev'][:-1]) * 3.28084
+
+                row['lat'] = ((float(row['lat'][0:2])
+                               + float(row['lat'][2:4])/60
+                               + float(row['lat'][4:8])/60) * ((-1, 1)[row['lat'][-1] =='N'] ))
+
+                row['lon'] = ((float(row['lon'][0:3])
+                               + float(row['lon'][3:5])/60
+                               + float(row['lon'][5:9])/60) * ((-1, 1)[row['lon'][-1] == 'E'] ))
+                data.append(row)
+                print(row)
     
     # Define the altitude range
     min_altitude = 2000
-    max_altitude = 18000
+    max_altitude = 8000  # 18000
 
     if ring_spacing == 'thousands':
         polygon_altitudes = np.arange(min_altitude, max_altitude + 1000, 1000)
@@ -162,18 +214,18 @@ def map_page():
 
     for polygon_altitude in polygon_altitudes:
         for row in data:
-            if row['ID'] in selected_rows:
+            if row['code'] in selected_rows:
                 center_locations.append(
                     (
-                        float(row['Lat']), 
-                        float(row['Long']), 
+                        float(row['lat']),
+                        float(row['lon']),
                         float(polygon_altitude), 
                         wind_speed, 
                         wind_direction,
-                        float(row['Altitude']) + arrival_altitude_agl, # Add arrival altitude AGL to the center location altitude
-                        row['Name'],
-                        row['Type'],
-                        row['Description']
+                        float(row['elev']) + arrival_altitude_agl, # Add arrival altitude AGL to the center location altitude
+                        row['name'],
+                        row['style'],
+                        row['desc']
                         )
                     )
                 
