@@ -45,7 +45,7 @@
                     "maxWidth": "50px",
                     "responsivePriority": 2,
                     "render": function ( data, type, row, meta ) {
-                        return data + ' ft';
+                        return data ;
                     }
                 },
                 {
@@ -355,13 +355,13 @@
                 <tbody>
                     {% for row in data %}
                     <tr>
-                        <td>{{ row.ID }}</td>
-                        <td>{{ row.Name }}</td>
-                        <td>{{ row.Altitude }}</td>
-                        <td>{{ row.Lat }}</td>
-                        <td>{{ row.Long }}</td>
-                        <td>{{ row.Type }}</td>
-                        <td>{{ row.Description }}</td>
+                        <td>{{ row.code }}</td>
+                        <td>{{ row.name }}</td>
+                        <td>{{ row.elev }}</td>
+                        <td>{{ row.lat }}</td>
+                        <td>{{ row.lon }}</td>
+                        <td>{{ row.style }}</td>
+                        <td>{{ row.desc }}</td>
                         <td>{{ row.County }}</td>
                         <td>{{ row.State }}</td>
                         <td>{{ row.Category }}</td>
