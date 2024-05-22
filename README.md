@@ -1,4 +1,6 @@
-Hamhanded clone of https://github.com/AlexCodeGlider/gliderFlightPlanner. Some modifications made for use with NewEngland turnpoints and (TBD) increased number of gliders that can be selected. 
+1. Hamhanded clone of https://github.com/AlexCodeGlider/gliderFlightPlanner.
+2. Modifications made for use with NewEngland turnpoints
+3. Can specify min and max altitudes to rings
 
 # Glider Flight Planner
 
