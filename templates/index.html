@@ -19,6 +19,17 @@
 <script>
     var glidersData = {{ gliders_json | safe }};
 </script>
+<script>
+    function ring_altitudes(alt_list, start, end, defaultAlt) {
+       for (let i = start; i <= end; i = i + 1000) {
+          var option = document.createElement("option");
+          if (i == defaultAlt){option.selected = true;}
+          option.value = i;
+          option.text = i;
+          alt_list.add(option);
+      };
+   }
+</script>
 
 <script>
     $(document).ready( function () {
@@ -128,7 +139,7 @@
         $("#deselectAllBtn").click(function() {
             table.rows().deselect();
         });
-        
+
         // Handle form submission
         $("#flightParametersForm").submit(function() {
             if (!validateForm()) {
@@ -139,7 +150,7 @@
             $.each(selectedRows, function(index, value) {
                 selectedData.push(value[0]); // Assuming the ID is in the first column
             });
-            
+
             // Add the selected row IDs as hidden input fields to the form
             $.each(selectedData, function(index, value) {
                 $("<input>").attr({
@@ -156,7 +167,13 @@
             option.text = glider.make + " " + glider.model;
             gliderDropdown.add(option);
         });
-    });    
+
+        var startAlt = document.getElementById("ringStartAlt");
+        ring_altitudes(startAlt, 2000, 8000, 3000);
+        var endAlt = document.getElementById("ringEndAlt");
+        ring_altitudes(endAlt, 2000, 18000, 8000);
+
+    });
     function handleGliderSelection() {
         var gliderSelection = document.getElementById("gliderSelection").value;
         var glideRatioInput = document.getElementById("glideRatio");
@@ -239,54 +256,59 @@
         <div>
             <a href="/user-guide" target="_blank" rel="noopener noreferrer">
                 <i class="fas fa-book mr-2"></i>User Guide
-            </a>            
+            </a>
         </div>
         <div>
             <a href="/disclaimer" target="_blank" rel="noopener noreferrer">
                 <i class="fas fa-exclamation-triangle mr-2"></i>Disclaimer
-            </a>            
+            </a>
         </div>
         <div class="mb-3">
             <a href="https://github.com/AlexCodeGlider/gliderFlightPlanner" target="_blank" rel="noopener noreferrer">
                 <i class="fab fa-github mr-2"></i>View project on GitHub
-            </a>            
+            </a>
         </div>
         <h2>Plan Your Flight</h2>
         <p>Start by setting your flight parameters, then choose or enter your landing locations. Once complete, submit to create your flight map.</p>
-        
+
         <form action="/index" method="post" id="flightParametersForm" target="_blank">
             <!-- Flight Parameters Section -->
             <h3>Step 1: Set Flight Parameters</h3>
             <p>Choose your glider from the dropdown or enter the glide ratio and best glide speed if your glider is not listed.</p>
 
-            <div class="row pt-1">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="gliderSelection">Select Glider:</label>
-                        <select class="form-control" id="gliderSelection" name="gliderSelection" onchange="handleGliderSelection()">
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
+        <div class="row pt-1">
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="gliderSelection">Select Glider:</label>
+                    <select class="form-control" id="gliderSelection" name="gliderSelection"
+                            onchange="handleGliderSelection()">
+                        <option value="other">Other</option>
+                    </select>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="glideRatio">Glide Ratio:</label>
-                        <input type="number" class="form-control" id="glideRatio" name="glideRatio" min="10" max="100" placeholder="e.g., 35" required>
-                    </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="glideRatio">Glide Ratio:</label>
+                    <input type="number" class="form-control" id="glideRatio" name="glideRatio"
+                           min="10" max="100" placeholder="e.g., 35" required>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="vg">Vg (Best Glide Speed in knots):</label>
-                        <input type="number" class="form-control" id="vg" name="vg" min="40" max="80" placeholder="e.g., 55" required>
-                    </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="vg">Vg (Best Glide Speed in knots):</label>
+                    <input type="number" class="form-control" id="vg" name="vg" min="40" max="80"
+                           placeholder="e.g., 55" required>
                 </div>
-                                
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="windDirection">Wind Direction (degrees):</label>
-                        <input type="number" class="form-control" id="windDirection" name="windDirection" min="0" max="360" placeholder="e.g., 250" required>
-                    </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="windDirection">Wind Direction (degrees):</label>
+                    <input type="number" class="form-control" id="windDirection"
+                           name="windDirection" min="0" max="360" placeholder="e.g., 250" required>
                 </div>
+            </div>
 
                 <div class="col-md-6">
                     <div class="form-group">
@@ -310,12 +332,32 @@
                 </div>
 
                 <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="ringSpacing">Draw Contour Rings every:</label>
+                     <div class="form-group">
+                        <label for="ringSpacingSelection">Draw Contour Rings every:</label>
                         <select class="form-control" id="ringSpacingSelection" name="ringSpacingSelection">
-                            <option value="thousands">Thousand feet MSL</option>
+                            <option value="thousands" selected>Thousand feet MSL</option>
                             <option value="evenThousands">Even Thousand feet MSL</option>
-                            <option value="oddThousands" selected>Odd Thousand feet MSL</option>
+                            <option value="oddThousands" >Odd Thousand feet MSL</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="ringStartAlt">Contour Ring Start Alt:</label>
+                        <select class="form-control" id="ringStartAlt" name="ringStartAlt"
+                                onChange="handleStartAltSelection()" >
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="ringEndAlt">Countour Ring End Alt:</label>
+                        <select class="form-control" id="ringEndAlt" name="ringEndAlt"
+                                onChange="handleEndAltSelection()">
+                            <option value="other">Ring End Alt</option>
                         </select>
                     </div>
                 </div>
@@ -324,7 +366,7 @@
 
             <!-- Custom Locations Section -->
             <h3>Step 2: Enter Custom Locations (Optional)</h3>
-            <p>Add any specific landing locations you wish to include in your flight plan.</p>            
+            <p>Add any specific landing locations you wish to include in your flight plan.</p>
             <div id="dynamicFieldContainer">
                 <!-- Initially empty, no form rows -->
             </div>
@@ -376,13 +418,13 @@
             <button id="deselectAllBtn" type="button" class="btn btn-secondary mt-3">
                 Deselect All
             </button>
-            
+
             <!-- Submit Button -->
             <input type="submit" class="btn btn-success mt-3" value="Create Map">
         </form>
     </div>
 
     <hr>
-    
+
 </body>
 {% endblock %}
