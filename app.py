@@ -134,6 +134,7 @@ def index():
 
         # Create a form data dictionary
         form_data = {
+            'selected_glider': selected_glider,
             'selected_rows': [selected_rows],
             'glide_ratio': glide_ratio,
             'safety_margin': safety_margin,
@@ -165,6 +166,7 @@ def disclaimer():
 @app.route("/map", methods=["GET"])
 def map_page():
     data = []
+    selected_glider = request.args.get('selected_glider')
     selected_rows_str = request.args.get('selected_rows')
     selected_rows = ast.literal_eval(selected_rows_str)
     wind_direction = float(request.args.get('wind_direction'))
@@ -286,7 +288,10 @@ def map_page():
         vg,
         center_locations,
         polygon_altitudes,
-        arrival_altitude_agl
+        arrival_altitude_agl,
+        selected_glider,
+        wind_speed,
+        wind_direction,
         ) 
 
     return render_template("map.html", map_html=map_html)

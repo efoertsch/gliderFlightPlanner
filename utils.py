@@ -7,6 +7,7 @@ from folium.features import DivIcon
 import smtplib
 from email.message import EmailMessage
 import os
+from branca.element import Template, MacroElement
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -81,7 +82,8 @@ def haversine(lon1, lat1, d, brng):
 
     return [lat2, lon2]
 
-def plot_map(lat1, lon1, glide_ratio, safety_margin, Vg, center_locations, polygon_altitudes, arrival_altitude_agl):
+def plot_map(lat1, lon1, glide_ratio, safety_margin, Vg, center_locations, polygon_altitudes,  \
+    arrival_altitude_agl, selected_glider,wind_speed,wind_direction):
     """
     Plots a map using Folium library with markers and polygons based on the input parameters.
 
@@ -148,6 +150,15 @@ def plot_map(lat1, lon1, glide_ratio, safety_margin, Vg, center_locations, polyg
                           html='<div style="font-size: 12pt; color: yellow; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;">%s ft</div>' % (altitude),
                       )
                     ).add_to(m)
+
+    #Display input values on map
+    template = get_input_parms_display(selected_glider, glide_ratio, Vg, safety_margin * 100, \
+                                       wind_speed,wind_direction, arrival_altitude_agl)
+    macro = MacroElement()
+    macro._template = Template(template)
+    m.get_root().add_child(macro)
+
+
     return m.get_root().render()
 
 def send_email(to_email, subject, content):
@@ -162,3 +173,100 @@ def send_email(to_email, subject, content):
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
         server.login(GMAIL_ADDRESS, GMAIL_PASSWORD)
         server.send_message(msg)
+
+## Original source from https://nbviewer.org/gist/talbertc-usgs/18f8901fc98f109f2b71156cf3ac81cd
+# and modified as needed
+def get_input_parms_display(selected_glider, glide_ratio, vg, safety_margin, wind_speed,wind_direction, arrival_altitude_agl):
+    template = f"""
+        {{% macro html(this, kwargs) %}}
+        
+        <!doctype html>
+        <html lang="en">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>jQuery UI Draggable - Default functionality</title>
+          <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        
+          <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+          <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+          
+          <script>
+          $( function() {{
+            $( '#parameterslegend' ).draggable({{
+                            start: function (event, ui) {{
+                                $(this).css({{
+                                    right: 'auto',
+                                    top: 'auto',
+                                    bottom: 'auto'
+                                }});
+                            }}
+                        }});
+        }});
+        
+          </script>
+        </head>
+        <body>
+        
+         
+        <div id='parameterslegend' class='parameterslegend' 
+            style='position: absolute; z-index:9999; border:2px solid grey; background-color:rgba(255, 255, 255, 0.8);
+             border-radius:6px; padding: 10px; font-size:14px; right: 20px; bottom: 20px;'; >
+             
+        <div class='parameters-title'>Input Values</div>
+        <div class='parameters-scale'>
+          <ul class='parameters-labels'>
+          <p>{selected_glider}<br>
+          Max L/D: {glide_ratio} at: {vg} kts<br>
+          Safety Margin over best L/D: {safety_margin}%<br>
+          Wind spd: {wind_speed}kts at: {wind_direction}degs<br>
+          Arrival alt: {arrival_altitude_agl}ft AGL
+          </p>
+          </ul>
+        </div>
+        </div>
+         
+        </body>
+        </html>
+        
+        <style type='text/css'>
+          .parameterslegend .parameters-title {{
+            text-align: left;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 90%;
+            }}
+          .parameterslegend .parameters-scale ul {{
+            margin: 0;
+            margin-bottom: 5px;
+            padding: 0;
+            float: left;
+            list-style: none;
+            }}
+          .parameterslegend .parameters-scale ul li {{
+            font-size: 80%;
+            list-style: none;
+            margin-left: 0;
+            line-height: 18px;
+            margin-bottom: 2px;
+            }}
+          .parameterslegend ul.parameters-labels li span {{
+            display: block;
+            float: left;
+            height: 16px;
+            width: 30px;
+            margin-right: 5px;
+            margin-left: 0;
+            border: 1px solid #999;
+            }}
+          .parameterslegend .parameters-source {{
+            font-size: 80%;
+            color: #777;
+            clear: both;
+            }}
+          .parameterslegend a {{
+            color: #777;
+            }}
+        </style>
+        {{% endmacro %}}"""
+    return template
