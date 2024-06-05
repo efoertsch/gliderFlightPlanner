@@ -1,6 +1,7 @@
 Cloned code from https://github.com/AlexCodeGlider/gliderFlightPlanner and made some modifications.
-2. Replaced original turnpoints with NewEngland turnpoints (Sterling cup file) 
-3. Can specify min and max altitude rings
+
+1. Replaced original turnpoints with NewEngland turnpoints (Sterling cup file)
+2. Can specify min and max altitude rings
 
 # Glider Flight Planner
 
