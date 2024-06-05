@@ -1,6 +1,6 @@
-1. Hamhanded clone of https://github.com/AlexCodeGlider/gliderFlightPlanner.
-2. Modifications made for use with NewEngland turnpoints
-3. Can specify min and max altitudes to rings
+Cloned code from https://github.com/AlexCodeGlider/gliderFlightPlanner and made some modifications.
+2. Replaced original turnpoints with NewEngland turnpoints (Sterling cup file) 
+3. Can specify min and max altitude rings
 
 # Glider Flight Planner
 
@@ -24,7 +24,7 @@ This application is provided as a tool to assist glider pilots in planning their
 
 1. Clone the repository:
 ```
-git clone https://github.com/AlexCodeGlider/gliderFlightPlanner.git
+git clone https://github.com/efoertsch/gliderFlightPlanner.git
 ```
 
 2. Navigate to the project directory and install the required packages:
@@ -33,12 +33,12 @@ cd gliderFlightPlanner
 pip install -r requirements.txt
 ```
 
-3. Run the Flask app:
+3. Run the Flask app. On Mac you may need to use alternate port as 5000 is used by MacOS
 ```
-flask run
+flask run       or flask run --port 8000    (eg. for MacOS)
 ```
 
-4. Open a web browser and navigate to `http://127.0.0.1:5000/` to access the app.
+4. Open a web browser and navigate to `http://127.0.0.1:5000/` (or 'http://127.0.0.1:8000/' to access the app.
 
 ## Usage
 
