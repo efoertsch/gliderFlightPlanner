@@ -63,9 +63,8 @@ def index():
     
     data = []
 
-    # Eric - Switched to cup style coding
-    # Load data from CSV
-    #with open('data/enriched_locations.csv', 'r') as file:
+    # Eric - Switched to cup files and cup field names
+    # Just replace  .cup extension with .csv and it works
     with open('data/Sterling_MA_2024_04.csv', 'r') as file:
         done = ''
         reader = csv.DictReader(file)

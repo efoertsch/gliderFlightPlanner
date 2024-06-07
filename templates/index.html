@@ -38,13 +38,11 @@
             "columnDefs": [
                 {
                     "targets": [ 0 ],
-                    "visible": false,
-                    "searchable": false
+                     "width": "5%"
                 },
                 {
                     "targets": [ 1 ],
-                    "width": "5%",
-                    "maxWidth": "50px",
+                    "width": "10%",
                     "responsivePriority": 1,
                     "render": function ( data, type, row, meta ) {
                         return '<a href="https://www.google.com/maps/search/?api=1&query=' + row[3] + ',' + row[4] + '" target="_blank" rel="noopener noreferrer">' + data + '</a>';
@@ -52,8 +50,7 @@
                 },
                 {
                     "targets": [ 2 ],
-                    "width": "5%",
-                    "maxWidth": "50px",
+                    "width": "10%",
                     "responsivePriority": 2,
                     "render": function ( data, type, row, meta ) {
                         return data ;
@@ -77,29 +74,12 @@
                 },
                 {
                     "targets": [ 5 ],
-                    "width": "5%",
-                    "maxWidth": "50px",
+                    "width": "10%",
                     "responsivePriority": 2
                 },
                 {
                     "targets": [ 6 ],
-                    "width": "5%",
-                    "responsivePriority": 2
-                },
-                {
-                    "targets": [ 7 ],
-                    "width": "5%",
-                    "responsivePriority": 2
-                },
-                {
-                    "targets": [ 8 ],
-                    "width": "5%",
-                    "maxWidth": "50px",
-                    "responsivePriority": 2
-                },
-                {
-                    "targets": [ 9 ],
-                    "width": "5%",
+                    "width": "45%",
                     "responsivePriority": 2
                 }
             ],
@@ -389,9 +369,6 @@
                         <th>Longitude</th>
                         <th>Type</th>
                         <th>Description</th>
-                        <th>County</th>
-                        <th>State</th>
-                        <th>Category</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -404,9 +381,6 @@
                         <td>{{ row.lon }}</td>
                         <td>{{ row.style }}</td>
                         <td>{{ row.desc }}</td>
-                        <td>{{ row.County }}</td>
-                        <td>{{ row.State }}</td>
-                        <td>{{ row.Category }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

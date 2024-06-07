@@ -154,6 +154,11 @@ def plot_map(lat1, lon1, glide_ratio, safety_margin, Vg, center_locations, polyg
     #Display input values on map
     template = get_input_parms_display(selected_glider, glide_ratio, Vg, safety_margin * 100, \
                                        wind_speed,wind_direction, arrival_altitude_agl)
+    # Add title
+    map_title = "Alitiude Required to Reach Destination"
+    title_html = f'<h1 style="position:absolute;z-index:100000;left:5vw; background-color:#ffffff60 ;color:black; padding:5px" >{map_title}</h1>'
+    m.get_root().html.add_child(folium.Element(title_html))
+
     macro = MacroElement()
     macro._template = Template(template)
     m.get_root().add_child(macro)
@@ -217,10 +222,10 @@ def get_input_parms_display(selected_glider, glide_ratio, vg, safety_margin, win
         <div class='parameters-scale'>
           <ul class='parameters-labels'>
           <p>{selected_glider}<br>
-          Max L/D: {glide_ratio} at: {vg} kts<br>
-          Safety Margin over best L/D: {safety_margin}%<br>
-          Wind spd: {wind_speed}kts at: {wind_direction}degs<br>
-          Arrival alt: {arrival_altitude_agl}ft AGL
+          Max L/D: {glide_ratio} at: {vg:.0f} kts<br>
+          Safety Margin over best L/D: {safety_margin:.0f}%<br>
+          Wind spd: {wind_speed:.0f}kts at: {wind_direction:.0f}degs<br>
+          Arrival alt: {arrival_altitude_agl:.0f}ft AGL
           </p>
           </ul>
         </div>
@@ -242,30 +247,6 @@ def get_input_parms_display(selected_glider, glide_ratio, vg, safety_margin, win
             padding: 0;
             float: left;
             list-style: none;
-            }}
-          .parameterslegend .parameters-scale ul li {{
-            font-size: 80%;
-            list-style: none;
-            margin-left: 0;
-            line-height: 18px;
-            margin-bottom: 2px;
-            }}
-          .parameterslegend ul.parameters-labels li span {{
-            display: block;
-            float: left;
-            height: 16px;
-            width: 30px;
-            margin-right: 5px;
-            margin-left: 0;
-            border: 1px solid #999;
-            }}
-          .parameterslegend .parameters-source {{
-            font-size: 80%;
-            color: #777;
-            clear: both;
-            }}
-          .parameterslegend a {{
-            color: #777;
             }}
         </style>
         {{% endmacro %}}"""
