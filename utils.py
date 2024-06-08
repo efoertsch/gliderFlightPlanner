@@ -9,12 +9,15 @@ from email.message import EmailMessage
 import os
 from branca.element import Template, MacroElement
 from dotenv import load_dotenv
+
 load_dotenv()
 
 GMAIL_ADDRESS = os.environ.get('GMAIL_ADDRESS')
 GMAIL_PASSWORD = os.environ.get('GMAIL_PASSWORD')
 
-def glide_range(altitude, arrival_altitude, glide_ratio, safety_margin, Vg, wind_speed, wind_direction, heading):
+
+def glide_range(altitude, arrival_altitude, glide_ratio, safety_margin, Vg, wind_speed,
+                wind_direction, heading):
     """
     Calculate the glide range of an aircraft in the presence of wind.
 
@@ -63,27 +66,29 @@ def glide_range(altitude, arrival_altitude, glide_ratio, safety_margin, Vg, wind
 
     return glide_range_wind_nm
 
+
 def haversine(lon1, lat1, d, brng):
     """
     Calculate the new coordinates given a starting point, distance and bearing
     """
-    R = 3440.069 #Radius of the Earth in nautical miles
-    brng = radians(brng) #convert bearing to radians
+    R = 3440.069  # Radius of the Earth in nautical miles
+    brng = radians(brng)  # convert bearing to radians
 
-    lat1 = radians(lat1) #Current lat point converted to radians
-    lon1 = radians(lon1) #Current long point converted to radians
+    lat1 = radians(lat1)  # Current lat point converted to radians
+    lon1 = radians(lon1)  # Current long point converted to radians
 
-    lat2 = asin( sin(lat1)*cos(d/R) + cos(lat1)*sin(d/R)*cos(brng) )
+    lat2 = asin(sin(lat1) * cos(d / R) + cos(lat1) * sin(d / R) * cos(brng))
 
-    lon2 = lon1 + atan2(sin(brng)*sin(d/R)*cos(lat1), cos(d/R)-sin(lat1)*sin(lat2))
+    lon2 = lon1 + atan2(sin(brng) * sin(d / R) * cos(lat1), cos(d / R) - sin(lat1) * sin(lat2))
 
     lat2 = degrees(lat2)
     lon2 = degrees(lon2)
 
     return [lat2, lon2]
 
-def plot_map(lat1, lon1, glide_ratio, safety_margin, Vg, center_locations, polygon_altitudes,  \
-    arrival_altitude_agl, selected_glider,wind_speed,wind_direction):
+
+def plot_map(lat1, lon1, glide_ratio, safety_margin, Vg, center_locations, polygon_altitudes, \
+             arrival_altitude_agl, selected_glider, wind_speed, wind_direction):
     """
     Plots a map using Folium library with markers and polygons based on the input parameters.
 
@@ -101,9 +106,15 @@ def plot_map(lat1, lon1, glide_ratio, safety_margin, Vg, center_locations, polyg
     str: The HTML code for the rendered map.
     """
     m = folium.Map(location=[lat1, lon1], tiles=None, zoom_start=10)
-    folium.TileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr='Esri', name='Satellite', overlay=False, control=True).add_to(m)
-    folium.TileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', attr='Esri', name='Topographic', overlay=False, control=True).add_to(m)
-    folium.TileLayer('https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Sectional/MapServer/tile/{z}/{y}/{x}', attr='Esri', name='VFR Sectional', overlay=False, control=True).add_to(m)
+    folium.TileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        attr='Esri', name='Satellite', overlay=False, control=True).add_to(m)
+    folium.TileLayer(
+        'https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+        attr='Esri', name='Topographic', overlay=False, control=True).add_to(m)
+    folium.TileLayer(
+        'https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/VFR_Sectional/MapServer/tile/{z}/{y}/{x}',
+        attr='Esri', name='VFR Sectional', overlay=False, control=True).add_to(m)
     folium.LayerControl().add_to(m)
 
     for altitude in polygon_altitudes:
@@ -112,24 +123,28 @@ def plot_map(lat1, lon1, glide_ratio, safety_margin, Vg, center_locations, polyg
         for lat, lon, polygon_altitude, wind_speed, wind_direction, arrival_altitude_msl, name, type, description in center_locations:
             folium.Marker(
                 location=[lat, lon],
-                popup=f"{name}\nType: {type}\nArrival Alt: {arrival_altitude_msl}ft\nLocation Alt: {arrival_altitude_msl-arrival_altitude_agl}ft\nDescription: {description}",
+                popup=f"{name}\nType: {type}\nArrival Alt: {arrival_altitude_msl}ft\nLocation Alt: {arrival_altitude_msl - arrival_altitude_agl}ft\nDescription: {description}",
                 icon=folium.Icon(icon="plane-arrival", prefix='fa')
             ).add_to(m)
             # Only calculate the polygon rings for altitudes above arrival altitude and the location type is not a turnpoint
             if altitude >= arrival_altitude_msl and type != "T":
                 polygon_points = []
                 for heading in range(0, 360, 10):
-                    range_nm = glide_range(altitude, arrival_altitude_msl, glide_ratio, safety_margin, Vg, wind_speed, wind_direction, heading)
+                    range_nm = glide_range(altitude, arrival_altitude_msl, glide_ratio,
+                                           safety_margin, Vg, wind_speed, wind_direction, heading)
                     new_point = haversine(lon, lat, range_nm, heading)
                     polygon_points.append(new_point)
 
                 polygons_points.append(polygon_points)
 
         # Merge the polygons using a union operation
-        merged_polygon = unary_union([Polygon(polygon_points) for polygon_points in polygons_points])
+        merged_polygon = unary_union(
+            [Polygon(polygon_points) for polygon_points in polygons_points])
 
         # Handle both Polygon and MultiPolygon cases
-        merged_polygons = list(merged_polygon.geoms) if isinstance(merged_polygon, MultiPolygon) else [merged_polygon]
+        merged_polygons = list(merged_polygon.geoms) if isinstance(merged_polygon,
+                                                                   MultiPolygon) else [
+            merged_polygon]
 
         for merged_polygon in merged_polygons:
             # Only proceed if the geometry is a Polygon
@@ -139,32 +154,28 @@ def plot_map(lat1, lon1, glide_ratio, safety_margin, Vg, center_locations, polyg
                 # Draw the merged polygon on the map
                 folium.Polygon(locations=merged_polygon_points, color='blue', fill=False).add_to(m)
 
-                label_locs = [1, 10, 19, 28] # bearing of the label locations
+                label_locs = [1, 10, 19, 28]  # bearing of the label locations
                 for loc in label_locs:
                     # Add a label with the altitude at the label locations
                     folium.Marker(
-                      location=merged_polygon_points[loc],
-                      icon=DivIcon(
-                          icon_size=(150,36),
-                          icon_anchor=(0,0),
-                          html='<div style="font-size: 12pt; color: yellow; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;">%s ft</div>' % (altitude),
-                      )
+                        location=merged_polygon_points[loc],
+                        icon=DivIcon(
+                            icon_size=(150, 36),
+                            icon_anchor=(0, 0),
+                            html='<div style="font-size: 12pt; color: yellow; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;">%s ft</div>' % (
+                                altitude),
+                        )
                     ).add_to(m)
 
-    #Display input values on map
-    template = get_input_parms_display(selected_glider, glide_ratio, Vg, safety_margin * 100, \
-                                       wind_speed,wind_direction, arrival_altitude_agl)
-    # Add title
-    map_title = "Alitiude Required to Reach Destination"
-    title_html = f'<h1 style="position:absolute;z-index:100000;left:5vw; background-color:#ffffff60 ;color:black; padding:5px" >{map_title}</h1>'
-    m.get_root().html.add_child(folium.Element(title_html))
-
+    # Display input values on map
+    parmsInfobox = get_input_parms_display(selected_glider, glide_ratio, Vg, safety_margin * 100, \
+                                       wind_speed, wind_direction, arrival_altitude_agl)
     macro = MacroElement()
-    macro._template = Template(template)
+    macro._template = Template(parmsInfobox)
     m.get_root().add_child(macro)
 
-
     return m.get_root().render()
+
 
 def send_email(to_email, subject, content):
     """Send email using SMTP."""
@@ -179,12 +190,13 @@ def send_email(to_email, subject, content):
         server.login(GMAIL_ADDRESS, GMAIL_PASSWORD)
         server.send_message(msg)
 
+
 ## Original source from https://nbviewer.org/gist/talbertc-usgs/18f8901fc98f109f2b71156cf3ac81cd
 # and modified as needed
-def get_input_parms_display(selected_glider, glide_ratio, vg, safety_margin, wind_speed,wind_direction, arrival_altitude_agl):
+def get_input_parms_display(selected_glider, glide_ratio, vg, safety_margin, wind_speed,
+                            wind_direction, arrival_altitude_agl):
     template = f"""
         {{% macro html(this, kwargs) %}}
-        
         <!doctype html>
         <html lang="en">
         <head>
@@ -192,10 +204,8 @@ def get_input_parms_display(selected_glider, glide_ratio, vg, safety_margin, win
           <meta name="viewport" content="width=device-width, initial-scale=1">
           <title>jQuery UI Draggable - Default functionality</title>
           <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-        
           <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
           <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-          
           <script>
           $( function() {{
             $( '#parameterslegend' ).draggable({{
@@ -208,12 +218,9 @@ def get_input_parms_display(selected_glider, glide_ratio, vg, safety_margin, win
                             }}
                         }});
         }});
-        
           </script>
         </head>
         <body>
-        
-         
         <div id='parameterslegend' class='parameterslegend' 
             style='position: absolute; z-index:9999; border:2px solid grey; background-color:rgba(255, 255, 255, 0.8);
              border-radius:6px; padding: 10px; font-size:14px; right: 20px; bottom: 20px;'; >
@@ -225,7 +232,8 @@ def get_input_parms_display(selected_glider, glide_ratio, vg, safety_margin, win
           Max L/D: {glide_ratio} at: {vg:.0f} kts<br>
           Safety Margin over best L/D: {safety_margin:.0f}%<br>
           Wind spd: {wind_speed:.0f}kts at: {wind_direction:.0f}degs<br>
-          Arrival alt: {arrival_altitude_agl:.0f}ft AGL
+          Arrival alt: {arrival_altitude_agl:.0f}ft AGL<br>
+          <br> Circles show altitude required <br>to reach destination
           </p>
           </ul>
         </div>
@@ -233,7 +241,6 @@ def get_input_parms_display(selected_glider, glide_ratio, vg, safety_margin, win
          
         </body>
         </html>
-        
         <style type='text/css'>
           .parameterslegend .parameters-title {{
             text-align: left;
@@ -251,3 +258,6 @@ def get_input_parms_display(selected_glider, glide_ratio, vg, safety_margin, win
         </style>
         {{% endmacro %}}"""
     return template
+
+
+
